@@ -1,0 +1,5 @@
+example1.c illustrates how to use Aho-Corasick Library in your code
+
+type fillowing comand to make example1:
+$ make
+

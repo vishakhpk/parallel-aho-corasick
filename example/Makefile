@@ -1,0 +1,12 @@
+PROGRAM := example2
+AC_PATH := ../ahocorasick/
+CFLAGS := -I$(AC_PATH) -L$(AC_PATH) -lahocorasick -fopenmp -w
+
+$(PROGRAM): example2.c
+	cd $(AC_PATH) && make
+	gcc -o $(PROGRAM) example2.c $(CFLAGS)
+
+clean:
+#	cd $(AC_PATH) && make clean
+	rm -f $(PROGRAM)
+
