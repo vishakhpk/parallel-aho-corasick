@@ -64,7 +64,7 @@ typedef struct
 void     ac_automata_init           (AC_AUTOMATA * thiz, MATCH_CALBACK mc);
 AC_ERROR ac_automata_add_string     (AC_AUTOMATA * thiz, STRING * str);
 void     ac_automata_locate_failure (AC_AUTOMATA * thiz);
-void     ac_automata_search         (AC_AUTOMATA * thiz, STRING * str, void * param, int automata_num, int thread_num);
+void     ac_automata_search         (AC_AUTOMATA * thiz, STRING * str, int automata_num, int thread_num);
 void     ac_automata_reset          (AC_AUTOMATA * thiz);
 void     ac_automata_release        (AC_AUTOMATA * thiz);
 

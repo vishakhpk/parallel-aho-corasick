@@ -278,7 +278,7 @@ DESCRIPTION:
 	Search for patterns inside the given input, as it finds a match
 	it will call the Callback functions to report it to caller.
 ******************************************************************************/
-void ac_automata_search (AC_AUTOMATA * thiz, STRING * str, void * param, int automata_num, int thread_num)
+void ac_automata_search (AC_AUTOMATA * thiz, STRING * str, int automata_num, int thread_num)
 {
 	//printf("\nIn thread %d, automata %d\n", automata_num, thread_num);
 	unsigned long position;
@@ -319,7 +319,7 @@ void ac_automata_search (AC_AUTOMATA * thiz, STRING * str, void * param, int aut
 			thiz->match.match_num = current->matched_strings_num;
 			thiz->match.matched_strings = current->matched_strings;
 			/* do callback: we found a match */
-			if (thiz->match_callback(&thiz->match, param, automata_num, thread_num))
+			if (thiz->match_callback(&thiz->match, automata_num, thread_num))
 				break;
 		}
 	}

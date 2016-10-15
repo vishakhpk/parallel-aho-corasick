@@ -1,19 +1,29 @@
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#include "aho_corasick.h"
 
 #define NO_OF_THREADS 2
 #define MAX_PATTERN_SIZE 128
 
-int main(int argc, char const *argv[])
+void read_file_to_search (const char *filename, STRING *buffer);
+int read_patterns (const char *filename, STRING *patterns);
+void print_usage (const char *exec_file);
+int match_handler(MATCH * m, int automata_num, int thread_num);
+
+int main(int argc, char **argv)
 {
 	AC_AUTOMATA *aca;
 	STRING *patterns, input_buffer;
 	unsigned int i, j, no_of_patterns;
+	int clopt;
 
 	/* Command line config*/
-	char *pattern_file;
-	char *input_file;
+	const char *pattern_file;
+	const char *input_file;
 	short verbosity = 0;
 
 	if (argc < 4) {
@@ -21,7 +31,7 @@ int main(int argc, char const *argv[])
 		exit(1);
 	}
 
-	while ((clopt == getopt(argc, argv, "P:v")) != -1) {
+	while ((clopt = getopt(argc, argv, "P:vh?")) != -1) {
 		switch (clopt) {
 			case 'P':
 				pattern_file = optarg;
@@ -36,11 +46,12 @@ int main(int argc, char const *argv[])
 				exit(1);
 		}
 	}
-	input_file = argv + optind;
+	input_file = *(argv + optind);
 
 	if (verbosity)
 		printf("Loading patterns from file - %s\n", pattern_file);	
-	no_of_patterns =  read_patterns (pattern_file, &patterns);
+	no_of_patterns =  read_patterns (pattern_file, patterns);
+	printf("%s\n", patterns->str);
 
 	aca = (AC_AUTOMATA *) malloc(sizeof(AC_AUTOMATA)*NO_OF_THREADS);
 	
@@ -57,32 +68,28 @@ int main(int argc, char const *argv[])
 	#pragma omp parallel for collapse(2)
 	for (i = 0; i < NO_OF_THREADS; i++)
 		for (j = 0; j < no_of_patterns; j++)
-			ac_automata_add_string(&aca[i], patterns + i)
+			ac_automata_add_string(&aca[i], patterns + i);
 
-	read_file_to_search(input_file, &input_buffer)
+	read_file_to_search(input_file, &input_buffer);
 
 	if (verbosity)
 		printf("Searching\n");
 
 	#pragma omp parallelfor private(i)
 	for (i = 0; i < NO_OF_THREADS; i++) {
+		int id = omp_get_thread_num();
 		if (verbosity) {
-			int id = omp_get_thread_num();
 			printf("In thread: %d, Automata: %d\n", id, i);
 		}
 
 		ac_automata_search(&aca[i], &input_buffer, i, id);
 	}
-
-	#pragma omp parallel for private(i) shared(aca)
-		for (i = 0; i < NO_OF_THREADS; i++)
-			ac_automata
 	
 	if (verbosity)
 		printf("Freeing resources\n");
 
 	for (i = 0; i < NO_OF_THREADS; i++)
-		ac_automata_release (&aca[i])
+		ac_automata_release (&aca[i]);
 
 	return 0;
 }
@@ -92,11 +99,7 @@ void read_file_to_search (const char *filename, STRING *buffer)
 {
 	FILE *fp;
 
-	if ((fp = fopen(filename, "r")) == -1)
-    {
-        printf("Cannot read from input file '%s'\n", filename);
-        return -1;
-    }
+	fp = fopen(filename, "r");
 
     fseek(fp, 0, SEEK_END);
     buffer->length = ftell(fp) + 1;
@@ -110,31 +113,35 @@ void read_file_to_search (const char *filename, STRING *buffer)
 }
 
 
-void read_patterns (const char *filename, STRING **patterns)
+int read_patterns (const char *filename, STRING *patterns)
 {
 	unsigned int no_of_patterns, i;
 	char *buffer = (char *) malloc(MAX_PATTERN_SIZE * sizeof(char));
 	FILE *fp;
 	
-	if ((fp = fopen(filename, "r")) == -1)
-    {
-        printf("Cannot read from pattern file '%s'\n", filename);
-        return -1;
-    }
+	fp = fopen(filename, "r");
 
 	fscanf(fp, "%u\n", &no_of_patterns);
-	*patterns = (STRING *) malloc(no_of_patterns * sizeof(STRING));
+	patterns = (STRING *) malloc(no_of_patterns * sizeof(STRING));
 
 	for (i = 0; i < no_of_patterns; i++) {
-		fscanf(fp, "{%s}\n", &buffer);
-		*patterns[i].str = (ALPHA *) malloc((strlen(buffer)+1) * sizeof(ALPHA));
+		fscanf(fp, "%s\n", buffer);
+
+		patterns[i].str = (ALPHA *) malloc((strlen(buffer)+1) * sizeof(ALPHA));
 		
 		strcpy(patterns[i].str, buffer);
 		patterns[i].length = strlen(buffer) + 1;
 		patterns[i].id = i;
 	}
+	printf("%s\n", patterns->str);
 
 	return no_of_patterns;
+}
+
+
+void print_usage (const char *exec_file)
+{
+    printf("Usage: %s [-v] -P pattern_file file1\n", exec_file);
 }
 
 

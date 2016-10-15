@@ -68,7 +68,7 @@ typedef struct
 	We use a callback function to report a match accurance
 	to the caller.
 */
-typedef int (*MATCH_CALBACK)(MATCH *, void *, int, int);
+typedef int (*MATCH_CALBACK)(MATCH *, int, int);
 
 /* Error Numbers */
 typedef enum

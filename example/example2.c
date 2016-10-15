@@ -37,7 +37,7 @@ ALPHA * input_str = {"recent arsenal"};
 /****************************************************************************/
 
 // 1. Define a callback function of type MATCH_CALBACK:
-int match_handler(MATCH * m, void * param, int automata_num, int thread_num)
+int match_handler(MATCH * m, int automata_num, int thread_num)
 {
 	unsigned int j;
 
@@ -110,7 +110,7 @@ int main (int argc, char ** argv)
 			printf("Automata %d:\n",c+1);
 			tmp_str.str = input_str;
 			tmp_str.length = strlen(tmp_str.str);		
-			ac_automata_search (&aca[c], &tmp_str, (void *)strdb, c, id);
+			ac_automata_search (&aca[c], &tmp_str, c, id);
 		}
 	//printf("\n3");
 
