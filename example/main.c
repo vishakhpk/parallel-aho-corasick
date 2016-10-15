@@ -49,9 +49,9 @@ int main(int argc, char **argv)
 	input_file = *(argv + optind);
 
 	if (verbosity)
-		printf("Loading patterns from file - %s\n", pattern_file);	
+		printf("Loading patterns from file - %s\n", pattern_file);
+	patterns = (STRING *) malloc(12 * sizeof(STRING));	
 	no_of_patterns =  read_patterns (pattern_file, patterns);
-	printf("%s\n", patterns->str);
 
 	aca = (AC_AUTOMATA *) malloc(sizeof(AC_AUTOMATA)*NO_OF_THREADS);
 	
@@ -122,7 +122,6 @@ int read_patterns (const char *filename, STRING *patterns)
 	fp = fopen(filename, "r");
 
 	fscanf(fp, "%u\n", &no_of_patterns);
-	patterns = (STRING *) malloc(no_of_patterns * sizeof(STRING));
 
 	for (i = 0; i < no_of_patterns; i++) {
 		fscanf(fp, "%s\n", buffer);
@@ -133,7 +132,6 @@ int read_patterns (const char *filename, STRING *patterns)
 		patterns[i].length = strlen(buffer) + 1;
 		patterns[i].id = i;
 	}
-	printf("%s\n", patterns->str);
 
 	return no_of_patterns;
 }
