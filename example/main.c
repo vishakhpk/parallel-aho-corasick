@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 	#pragma omp parallel for collapse(2)
 	for (i = 0; i < NO_OF_THREADS; i++)
 		for (j = 0; j < no_of_patterns; j++)
-			ac_automata_add_string(&aca[i], patterns + i);
+			ac_automata_add_string(&aca[i], patterns + j);
 
 	read_file_to_search(input_file, &input_buffer);
 
