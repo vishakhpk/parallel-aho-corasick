@@ -1,6 +1,9 @@
+#C files
 *~
 *.o
 *.a
 
+#executables
 example1
 example2
+a.out
