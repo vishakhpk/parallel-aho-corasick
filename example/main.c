@@ -87,10 +87,17 @@ int main(int argc, char **argv)
 	input_buffer = read_file_to_search(input_file);
 
 	if (verbosity)
+		printf("Locating failure nodes\n");
+
+	#pragma omp parallel for shared(aca)
+	for (i = 0; i < no_of_automata; i++)
+			ac_automata_locate_failure (&aca[i]);
+
+	if (verbosity)
 		printf("Searching\n");
 
-	#pragma omp parallel for private(i)
-	for (i = 0; i < NO_OF_THREADS; i++) {
+	#pragma omp parallel for shared(aca)
+	for (i = 0; i < no_of_automata; i++) {
 		int id = omp_get_thread_num();
 		if (verbosity) {
 			printf("In thread: %d, Automata: %d\n", id, i);
@@ -148,8 +155,6 @@ STRING** read_patterns (const char *filename, unsigned int *no_of_patterns)
 		for(j = 0; j < chunk; j++) {
 			if (fscanf(fp, "%s\n", buffer) == -1)
 				break;
-
-			printf("%d,%d\n", i/chunk, j);
 			
 			patterns[i/chunk][j].str = (ALPHA *) malloc((strlen(buffer)+1) * sizeof(ALPHA));
 			
