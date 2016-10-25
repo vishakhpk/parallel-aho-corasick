@@ -13,7 +13,7 @@ example2: example2.c
 	$(CC) -o example2 example2.c $(CFLAGS)
 main: main.c
 	cd $(AC_PATH) && make
-	$(CC) -o main main.c $(CFLAGS)
+	$(CC) -o main main.c $(CFLAGS) -lm
 
 
 clean:
@@ -23,3 +23,4 @@ clean:
 
 run:
 	./main -v -P pat file
+	
