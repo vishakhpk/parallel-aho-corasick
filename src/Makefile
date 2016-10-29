@@ -1,4 +1,4 @@
-all: example2 main
+all: example2.o main.o
 
 AC_PATH := ../lib/
 CFLAGS := -I$(AC_PATH) -L$(AC_PATH) -lahocorasick -fopenmp -w
@@ -9,7 +9,8 @@ else
 CC := gcc
 endif
 
-example2: example2.c
+example2.o: example2.c
+	mkdir -p ../bin
 	$(CC) -o ../bin/example2 example2.c $(CFLAGS)
-main: main.c
+main.o: main.c
 	$(CC) -o ../bin/main main.c $(CFLAGS) -lm
