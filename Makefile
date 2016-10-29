@@ -12,4 +12,4 @@ clean:
 	rm -f $(BIN_PATH)*
 
 run: build
-	$(BIN_PATH)main -v -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2
+	$(BIN_PATH)main -v -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2.txt
