@@ -11,5 +11,5 @@ clean:
 	# cd $(AC_PATH) && make clean
 	rm -f $(BIN_PATH)*
 
-run:
+run: build
 	$(BIN_PATH)main -v -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2
