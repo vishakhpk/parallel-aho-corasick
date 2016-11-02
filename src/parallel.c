@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	clock_t start = clock(), end, difference;
 	AC_AUTOMATA *aca;
 	STRING **patterns, input_buffer;
-	unsigned int i, j, no_of_patterns, no_of_automata = 0, chunk;
+	unsigned int i, j, no_of_patterns, chunk;
 	int clopt;
 
 	/* Command line config*/
@@ -59,34 +59,21 @@ int main(int argc, char **argv)
 		printf("Loading patterns from file - %s\n", pattern_file);
 	
 	patterns =  read_patterns (pattern_file, &no_of_patterns);
-	chunk = ceil((float)no_of_patterns / NO_OF_THREADS);
 
-	//Do this inside func
-	for (i = 0; i < no_of_patterns; i += chunk) {
-		for (int j = 0; j < chunk; j++) {
-			if (patterns[i/chunk][j].str == NULL) {
-				no_of_automata = i/chunk + 1;
-				break;
-			}
-		}
-	}
-	if (!no_of_automata)
-		no_of_automata = i/chunk;
-
-	aca = (AC_AUTOMATA *) malloc(sizeof(AC_AUTOMATA)*no_of_automata);
+	aca = (AC_AUTOMATA *) malloc(sizeof(AC_AUTOMATA)*NO_OF_THREADS);
 
 	if (verbosity)
 		printf("Initialising automata\n");
 	
 	#pragma omp parallel for shared(aca)
-	for(i = 0; i < no_of_automata; i++)
+	for(i = 0; i < NO_OF_THREADS; i++)
 		ac_automata_init (&aca[i], match_handler);
 
 	if (verbosity)
 		printf("Adding strings\n");
 
 	#pragma omp parallel for shared(aca)
-	for (i = 0; i < no_of_automata; i++)
+	for (i = 0; i < NO_OF_THREADS; i++)
 		for (j = 0; j < no_of_patterns; j++)
 			ac_automata_add_string(&aca[i], &patterns[i][j]);
 
@@ -96,14 +83,14 @@ int main(int argc, char **argv)
 		printf("Locating failure nodes\n");
 
 	#pragma omp parallel for shared(aca)
-	for (i = 0; i < no_of_automata; i++)
+	for (i = 0; i < NO_OF_THREADS; i++)
 			ac_automata_locate_failure (&aca[i]);
 
 	if (verbosity)
 		printf("Searching\n");
 
 	#pragma omp parallel for shared(aca)
-	for (i = 0; i < no_of_automata; i++) {
+	for (i = 0; i < NO_OF_THREADS; i++) {
 		int id = omp_get_thread_num();
 		if (verbosity) {
 			printf("In thread: %d, Automata: %d\n", id, i);
@@ -162,19 +149,20 @@ STRING** read_patterns (const char *filename, unsigned int *no_of_patterns)
 
 	fscanf(fp, "%u\n", no_of_patterns);
 
-	chunk = ceil((float)*no_of_patterns / NO_OF_THREADS);
-	for(i = 0; i < *no_of_patterns; i += chunk) {
-		patterns[i/chunk] = (STRING *) malloc(chunk * sizeof(STRING));
+	chunk = *no_of_patterns / NO_OF_THREADS;
+	for(i = 0; i < NO_OF_THREADS; i++) {
+		
+		patterns[i] = (STRING *) malloc(chunk * sizeof(STRING));
 		
 		for(j = 0; j < chunk; j++) {
 			if (fscanf(fp, "%s\n", buffer) == -1)
 				break;
 			
-			patterns[i/chunk][j].str = (ALPHA *) malloc((strlen(buffer)+1) * sizeof(ALPHA));
+			patterns[i][j].str = (ALPHA *) malloc((strlen(buffer)+1) * sizeof(ALPHA));
 			
-			strcpy(patterns[i/chunk][j].str, buffer);
-			patterns[i/chunk][j].length = strlen(buffer);
-			patterns[i/chunk][j].id = i + 1;
+			strcpy(patterns[i][j].str, buffer);
+			patterns[i][j].length = strlen(buffer);
+			patterns[i][j].id = i + 1;
 		}
 	}
 
