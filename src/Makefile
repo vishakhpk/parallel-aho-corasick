@@ -1,4 +1,4 @@
-all: example2.o main.o
+all: example2.o parallel.o serial.o
 
 AC_PATH := ../lib/
 CFLAGS := -I$(AC_PATH) -L$(AC_PATH) -lahocorasick -fopenmp -w
@@ -12,5 +12,7 @@ endif
 example2.o: example2.c
 	mkdir -p ../bin
 	$(CC) -o ../bin/example2 example2.c $(CFLAGS)
-main.o: main.c
-	$(CC) -o ../bin/main main.c $(CFLAGS) -lm
+parallel.o: parallel.c
+	$(CC) -o ../bin/parallel parallel.c $(CFLAGS) -lm
+serial.o: serial.c
+	$(CC) -o ../bin/serial serial.c $(CFLAGS) -lm
