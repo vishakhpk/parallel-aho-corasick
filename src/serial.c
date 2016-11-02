@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "aho_corasick.h"
@@ -16,6 +17,7 @@ int match_handler(MATCH * m, int automata_num, int thread_num);
 
 int main(int argc, char **argv)
 {
+	clock_t start = clock(), end, difference;
 	AC_AUTOMATA aca;
 	STRING *patterns, input_buffer;
 	unsigned int i, j, no_of_patterns;
@@ -25,19 +27,23 @@ int main(int argc, char **argv)
 	const char *pattern_file;
 	const char *input_file;
 	short verbosity = 0;
+	short timeit = 0;
 
 	if (argc < 4) {
 		print_usage(argv[0]);
 		exit(1);
 	}
 
-	while ((clopt = getopt(argc, argv, "P:vh?")) != -1) {
+	while ((clopt = getopt(argc, argv, "P:vth?")) != -1) {
 		switch (clopt) {
 			case 'P':
 				pattern_file = optarg;
 				break;
 			case 'v':
 				verbosity = 1;
+				break;
+			case 't':
+				timeit = 1;
 				break;
 			case 'h':
 			case '?':
@@ -80,6 +86,14 @@ int main(int argc, char **argv)
 		printf("Freeing resources\n");
 
 	ac_automata_release (&aca);
+
+	if (timeit) {
+		int msec;
+		end = clock();
+		difference = end - start;
+		msec = difference * 1000 / CLOCKS_PER_SEC;
+		printf("\nTotal time taken - %d milliseconds\n", msec);
+	}
 
 	return 0;
 }
