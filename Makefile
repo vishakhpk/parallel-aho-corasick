@@ -11,5 +11,8 @@ clean:
 	# cd $(AC_PATH) && make clean
 	rm -f $(BIN_PATH)*
 
-run: build
-	$(BIN_PATH)main -v -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2.txt
+parallel: build
+	$(BIN_PATH)parallel -v -t -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2.txt
+
+serial: build
+	$(BIN_PATH)serial -v -t -P $(DATA_PATH)patterns/example2.pat $(DATA_PATH)files/example2.txt
